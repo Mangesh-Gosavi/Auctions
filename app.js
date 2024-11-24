@@ -7,11 +7,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname)));
 
-let currentprice = 500;
-let nprice = currentprice;
+let currentprice = 4600000;
+let nprice = "No current bid";
 let userCount = 0;  
 
-// Serve static files (e.g., index.html)
+// Serve static files (index.html)
 app.get('/', (req, res) => {
     const option = {
         root: path.join(__dirname)
@@ -22,11 +22,13 @@ app.get('/', (req, res) => {
 
 app.post('/', (req, res) => {
     let price = req.body.nprice;
-    if (price) {
+    if (price > currentprice) {
         nprice = price;
-        currentprice = price;
         console.log("New Price", nprice);
-        io.emit('newuser', currentprice, nprice);  // Emit updated price to all users
+        io.emit('newuser', currentprice, nprice);  
+    }
+    else{
+
     }
 });
 
@@ -49,8 +51,7 @@ io.on('connection', function (socket) {
         console.log('User disconnected. Total users: ' + userCount);
 
         if (userCount === 0) {
-            currentprice = 500;
-            nprice = currentprice
+            nprice = "No current bid"
         }
     });
 });
