@@ -1,50 +1,59 @@
 const express = require('express');
-const app = express()
+const app = express();
+const http = require('http').Server(app);
+const path = require('path');
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-const http = require('http').Server(app);
-
-var path = require('path');
-var nprice;
-var currentprice = 500
-
 app.use(express.static(path.join(__dirname)));
 
-app.get('/',(req,res)=>{
-     var option = {
-        root:path.join(__dirname)
-     }
-     var filename = 'index.html';
-     res.sendFile(filename,option);
+let currentprice = 500;
+let nprice = currentprice;
+let userCount = 0;  
+
+// Serve static files (e.g., index.html)
+app.get('/', (req, res) => {
+    const option = {
+        root: path.join(__dirname)
+    };
+    const filename = 'index.html';
+    res.sendFile(filename, option);
 });
 
-var user = 1;
-var io = require('socket.io')(http)
-
-app.post('/',(req,res)=>{
-    let price = req.body.nprice
-        nprice = price 
-        currentprice = price
-        console.log("New Price",nprice);
-        io.emit('newuser',currentprice,nprice);
-        
-
+app.post('/', (req, res) => {
+    let price = req.body.nprice;
+    if (price) {
+        nprice = price;
+        currentprice = price;
+        console.log("New Price", nprice);
+        io.emit('newuser', currentprice, nprice);  // Emit updated price to all users
+    }
 });
 
-io.on('connection',function(socket){
-    console.log('User connected ' + user);
-    user++
-    socket.emit('newuser',currentprice,nprice);
-    
-    socket.on('disconnect',function(){
-        console.log('User disconnected',user);
-        user--
-       if (userCount === 0) {
-          currentPrice = 500;
+// Initialize Socket.IO
+const io = require('socket.io')(http);
+
+// Socket.IO connection event
+io.on('connection', function (socket) {
+    userCount++;  
+    console.log('User connected. Total users: ' + userCount);
+
+    if (userCount === 1) {
+        currentprice = 500;
+    }
+
+    socket.emit('newuser', currentprice, nprice);
+
+    socket.on('disconnect', function () {
+        userCount--;  // Decrement the user count when a user disconnects
+        console.log('User disconnected. Total users: ' + userCount);
+
+        if (userCount === 0) {
+            currentprice = 500;
         }
-    })
-})
+    });
+});
 
-http.listen(3000,()=>{
-    console.log('Server listening....');
-})
+http.listen(3000, () => {
+    console.log('Server listening on port 3000');
+});
