@@ -1,61 +1,54 @@
 const express = require('express');
-const app = express();
-const http = require('http').Server(app);
-const path = require('path');
-
+const app = express()
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+const http = require('http').Server(app);
+
+var path = require('path');
+let currentprice = 4600;
+let nprice = 0;
+let bid = 0;
+var user = 1;
+
 app.use(express.static(path.join(__dirname)));
 
-let currentprice = 4600000;
-let nprice = "No current bid";
-let userCount = 0;  
-
-// Serve static files (index.html)
-app.get('/', (req, res) => {
-    const option = {
-        root: path.join(__dirname)
-    };
-    const filename = 'index.html';
-    res.sendFile(filename, option);
+app.get('/',(req,res)=>{
+     var option = {
+        root:path.join(__dirname)
+     }
+     var filename = 'index.html';
+     res.sendFile(filename,option);
 });
 
-app.post('/', (req, res) => {
-    let price = req.body.nprice;
-    if (price > currentprice) {
-        nprice = price;
-        console.log("New Price", nprice);
-        io.emit('newuser', currentprice, nprice);  
+var io = require('socket.io')(http)
+
+app.post('/',(req,res)=>{
+    bid = req.body.nprice
+    if(bid > currentprice && bid > nprice){
+        nprice = bid
+        console.log("New Price",nprice);
+        io.emit('newuser',currentprice,nprice,bid);
     }
     else{
-
+        console.log("New Price",nprice);
+        io.emit('newuser',currentprice,nprice,bid);
     }
 });
 
-// Initialize Socket.IO
-const io = require('socket.io')(http);
-
-// Socket.IO connection event
-io.on('connection', function (socket) {
-    userCount++;  
-    console.log('User connected. Total users: ' + userCount);
-
-    if (userCount === 1) {
-        currentprice = 500;
-    }
-
-    socket.emit('newuser', currentprice, nprice);
-
-    socket.on('disconnect', function () {
-        userCount--;  
-        console.log('User disconnected. Total users: ' + userCount);
-
-        if (userCount === 0) {
+io.on('connection',function(socket){
+    console.log('User connected ' + user);
+    user++
+    socket.emit('newuser',currentprice,nprice);
+    
+    socket.on('disconnect',function(){
+        console.log('User disconnected',user);
+        user--
+        if (user === 0) {
             nprice = "No current bid"
         }
-    });
-});
+    })
+})
 
-http.listen(3000, () => {
-    console.log('Server listening on port 3000');
-});
+http.listen(3000,()=>{
+    console.log('Server listening....');
+})
