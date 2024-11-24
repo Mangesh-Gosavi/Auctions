@@ -45,7 +45,7 @@ io.on('connection', function (socket) {
     socket.emit('newuser', currentprice, nprice);
 
     socket.on('disconnect', function () {
-        userCount--;  // Decrement the user count when a user disconnects
+        userCount--;  
         console.log('User disconnected. Total users: ' + userCount);
 
         if (userCount === 0) {
