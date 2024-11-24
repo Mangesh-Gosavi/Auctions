@@ -24,6 +24,12 @@
         socket.on('newuser',function(cdata,data){
             document.getElementById("aprice").innerHTML = cdata;
             document.getElementById("price").innerHTML = data;
+            if(data == "No current bid"){
+                document.getElementById("price").style.color = "red";
+            }
+            else{
+                document.getElementById("price").style.color = "green";
+            }
 
         })
     </script>
