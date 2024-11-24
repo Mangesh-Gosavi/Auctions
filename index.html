@@ -11,24 +11,35 @@
     <h1 class="font-serif text-center font-semibold text-xl lg:text-4xl h-16 bg-orange-400 flex justify-center items-center">Welcome To Auctions<h1>
     <div class="bg-slate-300 flex justify-center items-center min-h-screen w-full">
         <form class="bg-white flex flex-col gap-6 text-center justify-center items-center rounded-xl h-4/5 w-4/5" action="/" method="post" enctype="application/json">
-            <h1 class="font-serif text-xl lg:text-3xl mt-10">Auction Product: AUDI<h1>
+            <h1 class="font-serif text-xl lg:text-3xl mt-10">Auction Product: Samsung AC<h1>
             <h3 class="font-serif text-xl lg:text-3xl">Price: <span id="aprice"></span></h3>
             <h3 class="font-serif text-xl lg:text-3xl ">New Price:<span id="price"></span></h3>
             <input class="text-xl lg:text-4xl  text-center border border-black rounded-xl min-w-full h-16" 
             placeholder="Enter your bidding ammount" type="text" name="nprice" required/>
+            <h3 class="font-serif text-xl lg:text-3xl "><span id="value"></span></h3>
             <button class="font-serif bg-pink-700 text-white p-4 rounded-xl text-xl lg:text-4xl mb-10" type="submit">Submit</button>
         </form>
     </div>
     <script>
         var socket =io()
-        socket.on('newuser',function(cdata,data){
+        socket.on('newuser',function(cdata,data,bid){
             document.getElementById("aprice").innerHTML = cdata;
-            document.getElementById("price").innerHTML = data;
-            if(data == "No current bid"){
+
+            if(data === 0){
+                document.getElementById("price").innerHTML = "No current bid";
                 document.getElementById("price").style.color = "red";
             }
             else{
+                document.getElementById("price").innerHTML = data
                 document.getElementById("price").style.color = "green";
+            }
+
+            if(data === 0 || bid < data){
+                document.getElementById("value").innerHTML = "Less than actual value"
+                document.getElementById("value").style.color = "red";
+            }
+            else{
+                document.getElementById("value").style.color = "white";
             }
 
         })
