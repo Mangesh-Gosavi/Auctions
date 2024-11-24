@@ -50,6 +50,7 @@ io.on('connection', function (socket) {
 
         if (userCount === 0) {
             currentprice = 500;
+            nprice = currentprice
         }
     });
 });
