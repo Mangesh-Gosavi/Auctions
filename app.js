@@ -39,6 +39,9 @@ io.on('connection',function(socket){
     socket.on('disconnect',function(){
         console.log('User disconnected',user);
         user--
+       if (userCount === 0) {
+          currentPrice = 500;
+        }
     })
 })
 
